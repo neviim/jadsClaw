@@ -54,11 +54,11 @@ log_info "Verificando estrutura do projeto..."
 
 if [ "$ENV" = "dev" ]; then
     ENV_DIR="${PROJECT_ROOT}/dev"
-    COMPOSE_CMD="docker compose -f ${PROJECT_ROOT}/base/docker-compose.yml -f ${ENV_DIR}/docker-compose.override.yml"
+    COMPOSE_CMD="docker compose --project-directory ${ENV_DIR} -f ${PROJECT_ROOT}/base/docker-compose.yml -f ${ENV_DIR}/docker-compose.override.yml"
     PORTA="8080"
 elif [ "$ENV" = "prod" ]; then
     ENV_DIR="${PROJECT_ROOT}/prod"
-    COMPOSE_CMD="docker compose -f ${PROJECT_ROOT}/base/docker-compose.yml -f ${ENV_DIR}/docker-compose.prod.yml"
+    COMPOSE_CMD="docker compose --project-directory ${ENV_DIR} -f ${PROJECT_ROOT}/base/docker-compose.yml -f ${ENV_DIR}/docker-compose.prod.yml"
     PORTA="8000"
 else
     log_fail "Ambiente inválido: '${ENV}'. Use 'dev' ou 'prod'."

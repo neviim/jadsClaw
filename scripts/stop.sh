@@ -26,10 +26,10 @@ echo ""
 
 if [ "$ENV" = "dev" ]; then
     ENV_DIR="${PROJECT_ROOT}/dev"
-    COMPOSE_CMD="docker compose -f ${PROJECT_ROOT}/base/docker-compose.yml -f ${ENV_DIR}/docker-compose.override.yml"
+    COMPOSE_CMD="docker compose --project-directory ${ENV_DIR} -f ${PROJECT_ROOT}/base/docker-compose.yml -f ${ENV_DIR}/docker-compose.override.yml"
 elif [ "$ENV" = "prod" ]; then
     ENV_DIR="${PROJECT_ROOT}/prod"
-    COMPOSE_CMD="docker compose -f ${PROJECT_ROOT}/base/docker-compose.yml -f ${ENV_DIR}/docker-compose.prod.yml"
+    COMPOSE_CMD="docker compose --project-directory ${ENV_DIR} -f ${PROJECT_ROOT}/base/docker-compose.yml -f ${ENV_DIR}/docker-compose.prod.yml"
 else
     echo -e "${RED}[FALHA]${NC} Ambiente inválido: '${ENV}'. Use 'dev' ou 'prod'."
     exit 1
