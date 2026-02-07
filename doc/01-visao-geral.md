@@ -69,9 +69,12 @@ jadsClaw/
 | Servico         | Porta | Endereco completo          |
 |-----------------|-------|----------------------------|
 | Gateway (UI)    | 18789 | http://127.0.0.1:18789     |
-| Bridge          | 18790 | 127.0.0.1:18790            |
 
-Ambos os ambientes (dev e prod) usam as mesmas portas, vinculadas a 127.0.0.1.
+Ambos os ambientes (dev e prod) usam a mesma porta, vinculada a 127.0.0.1.
+
+> **Nota:** Versoes anteriores expunham a porta 18790 para o protocolo Bridge (TCP).
+> Esse protocolo foi depreciado pelo OpenClaw — todos os dispositivos agora se
+> conectam via WebSocket na porta do Gateway (18789).
 
 ## Proximos passos
 

@@ -106,7 +106,7 @@ Define os recursos compartilhados entre ambientes:
 ### dev/docker-compose.override.yml
 
 Configuracoes especificas de desenvolvimento:
-- Portas `18789` (Gateway/UI) e `18790` (Bridge) em 127.0.0.1
+- Porta `18789` (Gateway/UI) em 127.0.0.1
 - Volumes: `data/` -> `/home/node/.openclaw`, `config/` -> `/app/config`
 - Debug ativado
 - Label do Watchtower
@@ -144,4 +144,4 @@ O script verifica automaticamente:
 - Se os arquivos de configuracao existem
 - Se o `.env` contem valores placeholder nao substituidos
 - Se as permissoes do `.env` estao corretas (producao)
-- Se as portas 18789 e 18790 estao disponiveis
+- Se a porta 18789 esta disponivel

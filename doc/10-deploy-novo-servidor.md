@@ -60,7 +60,7 @@ sudo ufw enable
 # Permitir SSH (importante! senao voce perde acesso remoto)
 sudo ufw allow ssh
 
-# NAO abrir portas 18789/18790 — o acesso e local via 127.0.0.1
+# NAO abrir porta 18789 — o acesso e local via 127.0.0.1
 # Se precisar de acesso remoto, use tunel SSH (veja passo 11)
 
 # Verificar regras
@@ -163,7 +163,25 @@ curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:18789/
 # Esperado: 200 ou 302
 ```
 
-### 11. Acesso remoto (opcional)
+### 11. Parear dispositivo (primeiro acesso)
+
+No primeiro acesso pelo navegador, o OpenClaw exige pareamento do dispositivo:
+
+1. Acesse http://127.0.0.1:18789 (ou via tunel SSH) e insira a senha
+2. O navegador mostrara "pairing required" — isso e normal
+3. Aprove o dispositivo:
+   ```bash
+   # Listar requests pendentes
+   docker exec openclaw_core node dist/index.js devices list
+
+   # Aprovar (use o requestId da lista)
+   docker exec openclaw_core node dist/index.js devices approve <requestId>
+   ```
+4. Recarregue a pagina e insira a senha novamente
+
+Veja [06-acesso-container.md](06-acesso-container.md) para detalhes sobre pairing.
+
+### 13. Acesso remoto (opcional)
 
 O OpenClaw so escuta em `127.0.0.1` por seguranca. Para acessar de outra
 maquina, use um tunel SSH:
@@ -176,7 +194,7 @@ ssh -L 18789:127.0.0.1:18789 usuario@ip-do-servidor
 # http://127.0.0.1:18789
 ```
 
-### 12. Configurar backup automatico (opcional)
+### 14. Configurar backup automatico (opcional)
 
 ```bash
 # Testar backup manual
@@ -235,6 +253,7 @@ docker login
 - [ ] `.env` configurado com chaves reais e permissao 600
 - [ ] Container rodando (`status.sh` OK)
 - [ ] Gateway respondendo na porta 18789
+- [ ] Dispositivo pareado (device pairing aprovado)
 - [ ] Watchtower ativo (se desejado)
 - [ ] Backup agendado no cron
 - [ ] Acesso remoto via SSH tunnel testado (se necessario)

@@ -78,11 +78,9 @@ else
     exit 1
 fi
 
-# Ler portas do .env (ou usar defaults)
+# Ler porta do .env (ou usar default)
 PORTA=$(grep -s '^OPENCLAW_PORT=' "${ENV_DIR}/.env" 2>/dev/null | cut -d'=' -f2)
 PORTA="${PORTA:-18789}"
-BRIDGE_PORT=$(grep -s '^OPENCLAW_BRIDGE_PORT=' "${ENV_DIR}/.env" 2>/dev/null | cut -d'=' -f2)
-BRIDGE_PORT="${BRIDGE_PORT:-18790}"
 
 # Adicionar watchtower se solicitado
 if [ "$WITH_WATCHTOWER" = true ]; then
@@ -152,7 +150,7 @@ for DIR in "${ENV_DIR}/data" "${ENV_DIR}/config"; do
 done
 
 # ---- 3. Verificar portas disponiveis ----
-for CHECK_PORT in ${PORTA} ${BRIDGE_PORT}; do
+for CHECK_PORT in ${PORTA}; do
     if ss -tlnp 2>/dev/null | grep -q ":${CHECK_PORT} " || netstat -tlnp 2>/dev/null | grep -q ":${CHECK_PORT} "; then
         log_warn "Porta ${CHECK_PORT} ja esta em uso. O container pode falhar ao iniciar."
     fi
@@ -233,7 +231,6 @@ echo "============================================"
 echo ""
 echo "  Ambiente:  ${ENV}"
 echo "  Gateway:   http://127.0.0.1:${PORTA}"
-echo "  Bridge:    porta ${BRIDGE_PORT}"
 echo "  Container: openclaw_core"
 if [ "$WITH_WATCHTOWER" = true ]; then
 echo "  Watchtower: ativo (atualizacoes diarias as 4h)"

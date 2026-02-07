@@ -66,8 +66,10 @@ LABEL com.centurylinklabs.watchtower.enable="true"
 # Seguranca: rodar como usuario nao-root
 USER node
 
-# Portas: 18789 (Gateway/UI) e 18790 (Bridge)
-EXPOSE 18789 18790
+# Porta: 18789 (Gateway/UI + WebSocket)
+# Nota: A porta Bridge (18790) foi removida — o protocolo TCP Bridge e legado.
+# Todos os nodes e dispositivos se conectam via WebSocket na porta do Gateway.
+EXPOSE 18789
 
 # Healthcheck via porta do gateway
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \

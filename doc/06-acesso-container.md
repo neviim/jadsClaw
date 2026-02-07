@@ -120,9 +120,17 @@ curl -X POST http://127.0.0.1:18789/api/chat \
    ```
 
 2. **Acessar a interface web:**
-   Abra http://127.0.0.1:18789 no navegador.
+   Abra http://127.0.0.1:18789 no navegador e insira a senha (`OPENCLAW_GATEWAY_PASSWORD`).
 
-3. **Fazer todas as configuracoes pela interface:**
+3. **Aprovar o dispositivo (primeiro acesso):**
+   O navegador mostrara "pairing required". Aprove via terminal:
+   ```bash
+   docker exec openclaw_core node dist/index.js devices list
+   docker exec openclaw_core node dist/index.js devices approve <requestId>
+   ```
+   Recarregue a pagina e insira a senha novamente.
+
+4. **Fazer todas as configuracoes pela interface:**
    - Conectar APIs (Claude, Gemini)
    - Configurar Skills
    - Configurar canais (Telegram, Discord)
@@ -134,18 +142,92 @@ curl -X POST http://127.0.0.1:18789/api/chat \
    cp -a dev/config/* prod/config/
    ```
 
-5. **Iniciar em producao:**
+6. **Iniciar em producao:**
    ```bash
    ./scripts/stop.sh dev
    ./scripts/start.sh prod
    ```
 
-6. **Verificar:**
+7. **Verificar:**
    ```bash
    ./scripts/status.sh prod
    ```
 
+## Pareamento de dispositivos (Device Pairing)
+
+O OpenClaw exige que cada dispositivo (navegador, CLI, etc.) seja **aprovado
+manualmente** antes de poder usar o sistema. Isso e um mecanismo de seguranca:
+mesmo com a senha correta, um dispositivo novo precisa ser pareado.
+
+### Por que o pairing existe
+
+- **Sem confianca automatica**: todo dispositivo precisa de aprovacao explicita
+- **Rotacao de tokens**: cada aprovacao gera um token unico para o dispositivo
+- **Auditoria**: dispositivos pareados ficam registrados em `devices/paired.json`
+
+### Fluxo de pareamento
+
+1. Voce acessa a Control UI no navegador e insere a senha
+2. O Gateway registra o dispositivo como **pendente**
+3. Um operador aprova o dispositivo via CLI
+4. O navegador reconecta automaticamente e funciona
+
+### Como aprovar um dispositivo
+
+```bash
+# Listar dispositivos (pendentes e pareados)
+docker exec openclaw_core node dist/index.js devices list
+
+# Aprovar um dispositivo pendente (use o requestId da lista)
+docker exec openclaw_core node dist/index.js devices approve <requestId>
+```
+
+**Exemplo completo:**
+
+```bash
+$ docker exec openclaw_core node dist/index.js devices list
+
+Pending (1)
+┌──────────────────────────────────────┬──────────┬────────────┐
+│ Request                              │ Role     │ IP         │
+├──────────────────────────────────────┼──────────┼────────────┤
+│ 3a37ea79-20f8-4352-be27-31875b82ba77 │ operator │ 172.18.0.1 │
+└──────────────────────────────────────┴──────────┴────────────┘
+
+$ docker exec openclaw_core node dist/index.js devices approve 3a37ea79-20f8-4352-be27-31875b82ba77
+Approved 4885a2ea...
+```
+
+Apos aprovar, recarregue a pagina no navegador e insira a senha novamente.
+
+> **Nota:** Requests pendentes expiram apos 5 minutos. Se expirar, recarregue
+> a pagina no navegador para gerar um novo request e aprove novamente.
+
+### Dados sensiveis
+
+Os arquivos de pareamento ficam em:
+- `data/devices/paired.json` — dispositivos aprovados (contem tokens)
+- `data/devices/pending.json` — requests pendentes
+
+Trate `paired.json` como dados sensiveis (equivalente a credenciais).
+
 ## Troubleshooting de acesso
+
+### "disconnected (1008): pairing required"
+
+Este erro aparece no navegador quando o dispositivo ainda nao foi aprovado pelo
+operador.
+
+**Solucao:**
+1. Verifique se ha requests pendentes:
+   ```bash
+   docker exec openclaw_core node dist/index.js devices list
+   ```
+2. Aprove o dispositivo:
+   ```bash
+   docker exec openclaw_core node dist/index.js devices approve <requestId>
+   ```
+3. Recarregue a pagina no navegador e insira a senha novamente
 
 ### "unauthorized: gateway password missing"
 
