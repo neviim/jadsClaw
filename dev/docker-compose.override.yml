@@ -1,0 +1,17 @@
+services:
+  openclawd:
+    extends:
+      file: ../base/docker-compose.yml
+      service: openclawd
+    ports:
+      - "127.0.0.1:8080:8000"
+    volumes:
+      - ./data:/app/data:rw
+      - ./config:/app/config:rw
+    environment:
+      - DEBUG=true
+      - LOG_LEVEL=debug
+
+networks:
+  openclaw_internal:
+    driver: bridge

@@ -1,0 +1,21 @@
+# Segredos — NUNCA versionar
+dev/.env
+prod/.env
+
+# Dados persistentes do container
+dev/data/
+prod/data/
+
+# Logs locais
+*.log
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Configuração
+CLAUDE.md
+GEMINI.md
+GROQ.md
+TELEGRAM.md
+DISCORD.md

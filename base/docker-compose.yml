@@ -1,0 +1,16 @@
+services:
+  openclawd:
+    image: openclaw/openclawd:latest
+    container_name: openclaw_core
+    networks:
+      - openclaw_internal
+    env_file: .env
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "1.5"
+
+networks:
+  openclaw_internal:
+    driver: bridge

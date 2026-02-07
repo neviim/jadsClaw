@@ -1,0 +1,30 @@
+services:
+  openclawd:
+    extends:
+      file: ../base/docker-compose.yml
+      service: openclawd
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./data:/app/data:rw
+      - ./config:/app/config:ro
+    user: "1000:1000"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+      - apparmor=docker-default
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:size=100M,noexec,nosuid,nodev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+networks:
+  openclaw_internal:
+    driver: bridge
