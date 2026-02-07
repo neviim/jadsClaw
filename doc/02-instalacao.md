@@ -41,7 +41,24 @@ sudo ufw enable
 cd ~/Developer/jadsClaw
 ```
 
-### 2. Criar os arquivos .env
+### 2. Build da imagem (primeira vez)
+
+A imagem `iapalandi/openclaw` precisa ser buildada a partir do source oficial
+ou baixada do Docker Hub.
+
+**Opcao A — Baixar do Docker Hub (recomendado):**
+```bash
+docker pull iapalandi/openclaw:latest
+```
+
+**Opcao B — Build local:**
+```bash
+./scripts/build-push.sh --no-push
+```
+
+Veja [doc/09-docker-hub.md](09-docker-hub.md) para mais detalhes.
+
+### 3. Criar os arquivos .env
 
 **Desenvolvimento:**
 ```bash
@@ -58,16 +75,6 @@ cp .env.example .env
 chmod 600 .env
 # Editar e preencher suas chaves:
 nano .env
-```
-
-### 3. Verificar a imagem Docker
-
-```bash
-# Baixar a imagem do OpenClawD
-docker pull openclaw/openclawd:latest
-
-# Verificar se foi baixada
-docker images | grep openclaw
 ```
 
 ### 4. Primeiro inicio
@@ -89,18 +96,30 @@ cd ~/Developer/jadsClaw
 # Ver logs para confirmar que iniciou corretamente
 ./scripts/logs.sh dev --tail 50
 
-# Testar acesso local
-curl http://127.0.0.1:8080/health
+# Testar acesso local (Gateway/UI)
+curl http://127.0.0.1:18789/
 ```
 
 ## Atualizacao da imagem
+
+### Via Watchtower (automatico)
+
+Se o Watchtower estiver ativo, ele verifica diariamente por novas versoes
+da imagem no Docker Hub e atualiza automaticamente.
+
+```bash
+# Iniciar com Watchtower
+./scripts/start.sh prod --with-watchtower
+```
+
+### Manual
 
 ```bash
 # Parar o ambiente atual
 ./scripts/stop.sh dev
 
 # Baixar nova versao
-docker pull openclaw/openclawd:latest
+docker pull iapalandi/openclaw:latest
 
 # Reiniciar
 ./scripts/start.sh dev
@@ -114,7 +133,7 @@ docker pull openclaw/openclawd:latest
 ./scripts/stop.sh prod --remove
 
 # Remover a imagem (opcional)
-docker rmi openclaw/openclawd:latest
+docker rmi iapalandi/openclaw:latest
 
 # Remover dados (CUIDADO: irreversivel!)
 # rm -rf prod/data dev/data

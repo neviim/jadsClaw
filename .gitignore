@@ -13,9 +13,13 @@ prod/data/
 .DS_Store
 Thumbs.db
 
-# Configuração
+# Configuracao
 CLAUDE.md
 GEMINI.md
 GROQ.md
 TELEGRAM.md
 DISCORD.md
+
+# Build temporario
+build/tmp/
+build/openclaw-src/

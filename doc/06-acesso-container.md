@@ -2,13 +2,12 @@
 
 ## Metodo 1: Interface web (navegador)
 
-O OpenClawD disponibiliza uma interface web acessivel pelo navegador.
+O OpenClaw disponibiliza uma interface web (Gateway UI) acessivel pelo navegador.
 Apos iniciar o container, acesse:
 
-| Ambiente        | URL                          |
+| Servico         | URL                          |
 |-----------------|------------------------------|
-| Desenvolvimento | http://127.0.0.1:8080        |
-| Producao        | http://127.0.0.1:8000        |
+| Gateway (UI)    | http://127.0.0.1:18789       |
 
 A interface web permite:
 - Configurar modelos de IA (Claude, Gemini, etc.)
@@ -47,18 +46,18 @@ docker exec openclaw_core ps aux
 # Verificar conectividade de rede
 docker exec openclaw_core curl -s http://httpbin.org/ip
 
+# Ver dados persistentes do OpenClaw
+docker exec openclaw_core ls -la /home/node/.openclaw/
+
 # Ver arquivos de configuracao
 docker exec openclaw_core ls -la /app/config/
-
-# Ver dados persistentes
-docker exec openclaw_core ls -la /app/data/
 ```
 
 ### Limitacoes em producao
 
 Em producao, o filesystem e somente leitura. Isso significa que voce **nao
 conseguira** criar ou editar arquivos diretamente dentro do container
-(exceto em `/tmp`).
+(exceto em `/tmp` e `/home/node/.cache`).
 
 Para alterar configuracoes em producao:
 1. Edite os arquivos na pasta `prod/config/` do host
@@ -87,31 +86,31 @@ em `/app/config/` dentro do container.
 ### Copiar do container para o host
 
 ```bash
-# Extrair um arquivo do container
-docker cp openclaw_core:/app/data/algum_arquivo.db ./
+# Extrair dados do OpenClaw
+docker cp openclaw_core:/home/node/.openclaw/ ./dados_exportados/
 
-# Extrair logs internos
-docker cp openclaw_core:/app/logs/ ./logs_exportados/
+# Extrair um arquivo especifico
+docker cp openclaw_core:/home/node/.openclaw/algum_arquivo ./
 ```
 
 ## Metodo 4: API REST (se disponivel)
 
-Se o OpenClawD expoe uma API REST, voce pode interagir via `curl`:
+Se o OpenClaw expoe uma API REST, voce pode interagir via `curl`:
 
 ```bash
-# Verificar saude do servico
-curl http://127.0.0.1:8000/health
+# Verificar se o gateway esta respondendo
+curl http://127.0.0.1:18789/
 
 # Listar configuracoes (endpoint pode variar)
-curl http://127.0.0.1:8000/api/config
+curl http://127.0.0.1:18789/api/config
 
 # Enviar mensagem de teste
-curl -X POST http://127.0.0.1:8000/api/chat \
+curl -X POST http://127.0.0.1:18789/api/chat \
   -H "Content-Type: application/json" \
   -d '{"message": "Ola, OpenClaw!"}'
 ```
 
-**Consulte a documentacao oficial do OpenClawD para os endpoints exatos.**
+**Consulte a documentacao oficial do OpenClaw para os endpoints exatos.**
 
 ## Fluxo recomendado para configuracao inicial
 
@@ -121,7 +120,7 @@ curl -X POST http://127.0.0.1:8000/api/chat \
    ```
 
 2. **Acessar a interface web:**
-   Abra http://127.0.0.1:8080 no navegador.
+   Abra http://127.0.0.1:18789 no navegador.
 
 3. **Fazer todas as configuracoes pela interface:**
    - Conectar APIs (Claude, Gemini)
@@ -178,6 +177,6 @@ um tunel SSH em vez de abrir a porta:
 
 ```bash
 # No computador remoto:
-ssh -L 8000:127.0.0.1:8000 usuario@seu-mint
-# Depois acesse http://127.0.0.1:8000 no computador remoto
+ssh -L 18789:127.0.0.1:18789 usuario@seu-mint
+# Depois acesse http://127.0.0.1:18789 no computador remoto
 ```

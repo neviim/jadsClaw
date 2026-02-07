@@ -46,7 +46,7 @@ Ative alertas de uso anormal nos dashboards das APIs:
 sudo ufw enable
 sudo ufw status
 
-# NAO abrir portas 8000 ou 8080 no firewall
+# NAO abrir portas 18789 ou 18790 no firewall
 # O bind em 127.0.0.1 ja impede acesso externo
 ```
 
@@ -91,10 +91,10 @@ manualmente para midia criptografada.
 
 ### O que cada volume armazena
 
-| Volume          | Conteudo                      | Backup necessario  |
-|-----------------|-------------------------------|--------------------|
-| `data/`         | Banco de dados, estado        | Sim                |
-| `config/`       | Configuracoes do OpenClawD    | Sim                |
+| Volume               | Caminho no container       | Conteudo                | Backup necessario  |
+|----------------------|----------------------------|-------------------------|--------------------|
+| `data/`              | `/home/node/.openclaw`     | Banco de dados, estado  | Sim                |
+| `config/`            | `/app/config`              | Configuracoes           | Sim                |
 
 ### Permissoes dos volumes
 
@@ -131,19 +131,25 @@ configuracoes:
 4. Verifique se a imagem esta correta: `docker images | grep openclaw`
 5. Tente recriar: `./scripts/stop.sh prod --remove && ./scripts/start.sh prod`
 
-## Atualizacoes do OpenClawD
+## Atualizacoes do OpenClaw
+
+### Automatica (via Watchtower)
+
+Com o Watchtower habilitado, atualizacoes sao aplicadas automaticamente
+diariamente as 4h da manha. Veja [doc/08-watchtower.md](08-watchtower.md).
+
+### Manual
 
 Antes de atualizar a imagem:
 1. Faca backup: `./scripts/backup.sh`
 2. Pare o ambiente: `./scripts/stop.sh prod`
-3. Baixe a nova imagem: `docker pull openclaw/openclawd:latest`
+3. Baixe a nova imagem: `docker pull iapalandi/openclaw:latest`
 4. Inicie: `./scripts/start.sh prod`
 5. Verifique: `./scripts/status.sh prod`
 
-Se algo der errado, restaure o backup e volte para a imagem anterior
-especificando a tag:
+Se algo der errado, restaure o backup e reconstrua a imagem com a versao anterior:
 ```bash
-docker pull openclaw/openclawd:versao_anterior
+./scripts/build-push.sh --version <tag_anterior> --no-push
 ```
 
 ## Checklist periodico de manutencao
@@ -155,7 +161,7 @@ docker pull openclaw/openclawd:versao_anterior
 
 ### Mensal
 - [ ] Atualizar sistema: `sudo apt update && sudo apt upgrade`
-- [ ] Verificar atualizacao da imagem Docker
+- [ ] Verificar se o Watchtower esta atualizando corretamente
 - [ ] Revisar uso de API nos dashboards
 - [ ] Verificar espaco em disco
 
@@ -164,3 +170,4 @@ docker pull openclaw/openclawd:versao_anterior
 - [ ] Revisar permissoes e seguranca
 - [ ] Testar restauracao de backup
 - [ ] Verificar se UFW esta ativo
+- [ ] Rebuildar a imagem com `./scripts/build-push.sh`

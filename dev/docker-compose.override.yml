@@ -2,13 +2,16 @@ services:
   openclawd:
     env_file: .env
     ports:
-      - "127.0.0.1:8080:8000"
+      - "127.0.0.1:18789:18789"
+      - "127.0.0.1:18790:18790"
     volumes:
-      - ./data:/app/data:rw
+      - ./data:/home/node/.openclaw:rw
       - ./config:/app/config:rw
     environment:
       - DEBUG=true
       - LOG_LEVEL=debug
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
 networks:
   openclaw_internal:

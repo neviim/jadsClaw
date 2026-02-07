@@ -2,10 +2,13 @@
 
 ## O que e o jadsClaw
 
-Ambiente Docker seguro e isolado para executar o **OpenClawD** no Linux Mint 22,
+Ambiente Docker seguro e isolado para executar o **OpenClaw** no Linux Mint 22,
 seguindo o principio de **Privilegio Minimo**. O projeto separa os ambientes de
 desenvolvimento e producao com hardening completo para proteger chaves API,
 credenciais e dados da maquina host.
+
+A imagem Docker e buildada a partir do source oficial e publicada no Docker Hub
+como `iapalandi/openclaw`. O Watchtower monitora atualizacoes automaticamente.
 
 ## Arquitetura
 
@@ -20,7 +23,11 @@ jadsClaw/
 │   ├── 04-seguranca.md          # Hardening e protecao
 │   ├── 05-scripts.md            # Uso dos scripts operacionais
 │   ├── 06-acesso-container.md   # Acesso ao container e interface web
-│   └── 07-recomendacoes.md      # Boas praticas e alertas
+│   ├── 07-recomendacoes.md      # Boas praticas e alertas
+│   ├── 08-watchtower.md         # Auto-update com Watchtower
+│   └── 09-docker-hub.md         # Publicacao no Docker Hub
+├── build/                       # Dockerfile para build da imagem
+│   └── Dockerfile
 ├── base/                        # Compose base (configuracoes comuns)
 │   └── docker-compose.yml
 ├── dev/                         # Ambiente de desenvolvimento
@@ -33,12 +40,14 @@ jadsClaw/
 │   ├── docker-compose.prod.yml
 │   ├── data/                    # Dados persistentes (prod)
 │   └── config/                  # Configuracoes (prod, somente leitura)
+├── docker-compose.watchtower.yml # Watchtower (auto-update)
 ├── scripts/                     # Scripts operacionais
 │   ├── start.sh                 # Iniciar + validar
 │   ├── stop.sh                  # Parar containers
 │   ├── status.sh                # Verificar status e seguranca
 │   ├── logs.sh                  # Visualizar logs
-│   └── backup.sh                # Backup dos dados de producao
+│   ├── backup.sh                # Backup dos dados de producao
+│   └── build-push.sh            # Build e push da imagem para Docker Hub
 └── .gitignore                   # Protege .env e data/ do versionamento
 ```
 
@@ -52,13 +61,17 @@ jadsClaw/
    versionadas no git.
 4. **Acesso local apenas**: Portas mapeadas em `127.0.0.1`, sem exposicao na LAN.
 5. **Dois ambientes**: Dev para testes rapidos, Prod para uso real com hardening.
+6. **Auto-update**: Watchtower monitora a imagem no Docker Hub e atualiza
+   automaticamente.
 
 ## Portas
 
-| Ambiente        | Porta | Endereco completo          |
+| Servico         | Porta | Endereco completo          |
 |-----------------|-------|----------------------------|
-| Desenvolvimento | 8080  | http://127.0.0.1:8080      |
-| Producao        | 8000  | http://127.0.0.1:8000      |
+| Gateway (UI)    | 18789 | http://127.0.0.1:18789     |
+| Bridge          | 18790 | 127.0.0.1:18790            |
+
+Ambos os ambientes (dev e prod) usam as mesmas portas, vinculadas a 127.0.0.1.
 
 ## Proximos passos
 
@@ -69,3 +82,5 @@ Siga a documentacao na ordem numerada:
 4. [Scripts](05-scripts.md)
 5. [Acesso ao container](06-acesso-container.md)
 6. [Recomendacoes](07-recomendacoes.md)
+7. [Watchtower](08-watchtower.md)
+8. [Docker Hub](09-docker-hub.md)

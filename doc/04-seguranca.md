@@ -3,7 +3,7 @@
 ## Visao geral das camadas de protecao
 
 O projeto implementa seguranca em multiplas camadas para garantir que, mesmo
-em caso de comprometimento do OpenClawD, o atacante nao consiga acessar a
+em caso de comprometimento do OpenClaw, o atacante nao consiga acessar a
 maquina host.
 
 ```
@@ -28,14 +28,15 @@ maquina host.
 user: "1000:1000"
 ```
 
-O container roda com o mesmo UID/GID do seu usuario local. Isso significa que:
+O container roda com o usuario `node` (uid 1000), que e o usuario padrao
+da imagem `node:22-bookworm`. Isso significa que:
 - Se o processo escapar do container, ele nao tera privilegios de root no host.
 - Arquivos criados nos volumes terao as permissoes do seu usuario.
 
 **Verificacao:**
 ```bash
 docker exec openclaw_core whoami
-# Esperado: NÃO deve retornar "root"
+# Esperado: node
 ```
 
 ### 2. Filesystem somente leitura
@@ -44,14 +45,14 @@ docker exec openclaw_core whoami
 read_only: true
 tmpfs:
   - /tmp:size=100M,noexec,nosuid,nodev
+  - /home/node/.cache:size=200M,noexec,nosuid,nodev
 ```
 
-O filesystem inteiro do container e montado como somente leitura. O unico
-local gravavel e o `/tmp`, que:
-- Tem tamanho limitado (100MB)
-- `noexec`: nao permite execucao de binarios
-- `nosuid`: ignora bits SUID/SGID
-- `nodev`: nao permite dispositivos especiais
+O filesystem inteiro do container e montado como somente leitura. Os unicos
+locais gravaveis sao:
+- `/tmp` — arquivos temporarios (100MB, sem execucao)
+- `/home/node/.cache` — cache do Node.js (200MB, sem execucao)
+- `/home/node/.openclaw` — dados persistentes (volume mapeado)
 
 **Verificacao:**
 ```bash
@@ -71,11 +72,6 @@ Todas as capabilities do kernel Linux sao removidas. Isso impede:
 - Alterar configuracoes de rede
 - Enviar sinais para processos externos
 - Usar raw sockets (sem ARP spoofing ou sniffing)
-
-**Por que NAO usamos cap_add NET_RAW:**
-`NET_RAW` permite crafting de pacotes de rede. Isso habilita ataques de ARP
-spoofing e network sniffing de dentro do container. O OpenClawD nao precisa
-disso para funcionar — conexoes HTTP de saida funcionam sem esta capability.
 
 **Verificacao:**
 ```bash
@@ -100,19 +96,20 @@ security_opt:
 
 ```yaml
 ports:
-  - "127.0.0.1:8000:8000"
+  - "127.0.0.1:18789:18789"
+  - "127.0.0.1:18790:18790"
 ```
 
-A porta e mapeada APENAS para `127.0.0.1` (localhost). Isso significa:
-- Ninguem na sua rede Wi-Fi/LAN consegue acessar o OpenClawD.
+As portas sao mapeadas APENAS para `127.0.0.1` (localhost). Isso significa:
+- Ninguem na sua rede Wi-Fi/LAN consegue acessar o OpenClaw.
 - O acesso e exclusivamente pelo navegador da sua maquina.
 
 **NAO use:**
 ```yaml
 # ERRADO — expoe para toda a rede
 ports:
-  - "8000:8000"
-  - "0.0.0.0:8000:8000"
+  - "18789:18789"
+  - "0.0.0.0:18789:18789"
 ```
 
 ### 6. Limite de recursos
@@ -125,7 +122,7 @@ deploy:
       cpus: "1.5"
 ```
 
-Impede que o container consuma todos os recursos da maquina. Se o OpenClawD
+Impede que o container consuma todos os recursos da maquina. Se o OpenClaw
 tentar usar mais de 2GB de RAM, o Docker matara o processo (OOM kill).
 
 ## O que NUNCA fazer
@@ -140,6 +137,10 @@ tentar usar mais de 2GB de RAM, o Docker matara o processo (OOM kill).
 | `cap_add: NET_RAW`                   | Permite sniffing e ARP spoofing                |
 | Rodar sem `.gitignore` para `.env`   | Risco de vazar chaves API no repositorio       |
 
+**Nota:** O Watchtower precisa do Docker socket para funcionar — isso e
+esperado e seguro pois ele roda em um container separado com `read_only: true`
+e `cap_drop: ALL`.
+
 ## Checklist de verificacao de seguranca
 
 Execute o script de status para verificar todas as protecoes:
@@ -149,16 +150,17 @@ Execute o script de status para verificar todas as protecoes:
 ```
 
 O script verifica automaticamente:
-- [ ] Processo non-root
+- [ ] Processo non-root (usuario `node`)
 - [ ] Filesystem somente leitura
 - [ ] Capabilities zeradas
 - [ ] Healthcheck respondendo
 - [ ] Portas mapeadas apenas em 127.0.0.1
+- [ ] Status do Watchtower
 
 ### Verificacao manual adicional
 
 ```bash
-# Socket do Docker NAO esta mapeado
+# Socket do Docker NAO esta mapeado no openclaw_core
 docker inspect openclaw_core --format='{{.HostConfig.Binds}}' | grep -v docker.sock
 
 # Nenhuma capability ativa
@@ -180,5 +182,5 @@ sudo ufw enable
 sudo ufw status
 
 # Como mapeamos para 127.0.0.1, o trafego externo ja e bloqueado.
-# Mas por precaucao, nao abra as portas 8000/8080 no UFW.
+# Mas por precaucao, nao abra as portas 18789/18790 no UFW.
 ```

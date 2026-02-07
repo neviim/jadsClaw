@@ -10,6 +10,15 @@ isso, mas sempre verifique antes de fazer commit.
 
 ## Variaveis disponiveis
 
+### OpenClaw Gateway
+
+| Variavel                   | Descricao                               | Obrigatoria |
+|----------------------------|-----------------------------------------|-------------|
+| OPENCLAW_GATEWAY_TOKEN     | Token de acesso ao gateway              | Sim*        |
+| OPENCLAW_GATEWAY_PASSWORD  | Senha alternativa ao token              | Sim*        |
+
+*Pelo menos uma das duas e necessaria para acesso remoto ao gateway.
+
 ### APIs principais
 
 | Variavel           | Descricao                          | Obrigatoria |
@@ -29,7 +38,7 @@ isso, mas sempre verifique antes de fazer commit.
 | DISCORD_TOKEN            | Token do bot do Discord                           |
 
 **IMPORTANTE:** O campo `TELEGRAM_ALLOWED_USERS` e critico para seguranca.
-Sem ele, qualquer pessoa que encontrar seu bot podera interagir com o OpenClawD.
+Sem ele, qualquer pessoa que encontrar seu bot podera interagir com o OpenClaw.
 
 Para descobrir seu ID do Telegram, envie uma mensagem para @userinfobot.
 
@@ -77,26 +86,37 @@ Para descobrir seu ID do Telegram, envie uma mensagem para @userinfobot.
 ### base/docker-compose.yml
 
 Define os recursos compartilhados entre ambientes:
-- Imagem do OpenClawD
+- Imagem do OpenClaw (`iapalandi/openclaw:latest`)
 - Limite de memoria (2G) e CPU (1.5 cores)
 - Rede interna do Docker
 
 ### dev/docker-compose.override.yml
 
 Configuracoes especificas de desenvolvimento:
-- Porta `8080` (local)
-- Volumes com escrita permitida em `data/` e `config/`
+- Portas `18789` (Gateway/UI) e `18790` (Bridge) em 127.0.0.1
+- Volumes: `data/` -> `/home/node/.openclaw`, `config/` -> `/app/config`
 - Debug ativado
+- Label do Watchtower
 
 ### prod/docker-compose.prod.yml
 
 Configuracoes de producao com hardening:
-- Porta `8000` (local)
+- Mesmas portas em 127.0.0.1
 - `config/` em somente leitura
 - Filesystem somente leitura
 - Sem root, sem capabilities
+- tmpfs para `/tmp` e `/home/node/.cache`
 - Healthcheck automatico
 - Restart automatico
+- Label do Watchtower
+
+### docker-compose.watchtower.yml (raiz)
+
+Servico Watchtower para auto-update:
+- Usa `nickfedor/watchtower` (fork compativel com Docker 29+)
+- Monitora apenas containers com label habilitado
+- Verifica atualizacoes diariamente as 4h da manha
+- Veja [doc/08-watchtower.md](08-watchtower.md) para detalhes
 
 ## Validacao da configuracao
 
@@ -111,4 +131,4 @@ O script verifica automaticamente:
 - Se os arquivos de configuracao existem
 - Se o `.env` contem valores placeholder nao substituidos
 - Se as permissoes do `.env` estao corretas (producao)
-- Se a porta necessaria esta disponivel
+- Se as portas 18789 e 18790 estao disponiveis

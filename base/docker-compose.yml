@@ -1,6 +1,6 @@
 services:
   openclawd:
-    image: openclaw/openclawd:latest
+    image: iapalandi/openclaw:latest
     container_name: openclaw_core
     networks:
       - openclaw_internal

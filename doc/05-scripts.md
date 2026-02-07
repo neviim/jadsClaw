@@ -5,7 +5,7 @@ argumento: `dev` ou `prod` (padrao: `prod`).
 
 ## start.sh — Iniciar e validar
 
-Inicia o OpenClawD com validacao completa de pre-requisitos.
+Inicia o OpenClaw com validacao completa de pre-requisitos.
 
 ```bash
 # Iniciar em producao (padrao)
@@ -13,6 +13,10 @@ Inicia o OpenClawD com validacao completa de pre-requisitos.
 
 # Iniciar em desenvolvimento
 ./scripts/start.sh dev
+
+# Iniciar com Watchtower (auto-update)
+./scripts/start.sh prod --with-watchtower
+./scripts/start.sh dev --with-watchtower
 ```
 
 ### O que o script valida antes de iniciar
@@ -21,20 +25,23 @@ Inicia o OpenClawD com validacao completa de pre-requisitos.
 2. Docker Compose disponivel
 3. Arquivo `docker-compose.yml` base existe
 4. Arquivo compose do ambiente existe
-5. Arquivo `.env` existe e nao contem placeholders
-6. Permissoes do `.env` (corrige para 600 em producao)
-7. Diretorios `data/` e `config/` existem (cria se necessario)
-8. Porta nao esta em uso
+5. Arquivo compose do watchtower existe (se `--with-watchtower`)
+6. Arquivo `.env` existe e nao contem placeholders
+7. Permissoes do `.env` (corrige para 600 em producao)
+8. Diretorios `data/` e `config/` existem (cria se necessario)
+9. Portas 18789 e 18790 nao estao em uso
 
 ### O que o script valida apos iniciar
 
 1. Container esta rodando (aguarda ate 30 segundos)
 2. Usuario do container (alerta se root em producao)
-3. Healthcheck HTTP responde
+3. Gateway HTTP responde
+4. Watchtower esta rodando (se habilitado)
 
 ## stop.sh — Parar containers
 
-Para todos os containers do ambiente.
+Para todos os containers do ambiente. Se o Watchtower estiver rodando,
+ele e parado automaticamente.
 
 ```bash
 # Parar producao
@@ -73,6 +80,7 @@ Exibe informacoes completas sobre o container e validacoes de seguranca.
 - Verificacao de filesystem (somente leitura)
 - Capabilities ativas
 - Portas mapeadas
+- Status do Watchtower
 - Espaco em disco dos volumes
 
 ## logs.sh — Visualizar logs
@@ -101,6 +109,32 @@ Exibe logs do container com opcoes de filtragem.
 ```
 
 **Para sair do modo follow:** pressione `Ctrl+C`.
+
+## build-push.sh — Build e push da imagem
+
+Builda a imagem OpenClaw a partir do source oficial e faz push para o
+Docker Hub (conta `iapalandi`).
+
+```bash
+# Build e push (padrao)
+./scripts/build-push.sh
+
+# Apenas build local (sem push)
+./scripts/build-push.sh --no-push
+
+# Build de uma versao/tag especifica
+./scripts/build-push.sh --version v1.2.3
+```
+
+### O que o script faz
+
+1. Verifica se o Docker esta instalado
+2. Verifica se o `build/Dockerfile` existe
+3. Faz `docker build` com multi-stage (builder + runtime)
+4. Aplica tags `iapalandi/openclaw:latest` e `iapalandi/openclaw:<versao>`
+5. Faz `docker push` para o Docker Hub (se nao `--no-push`)
+
+Veja [doc/09-docker-hub.md](09-docker-hub.md) para mais detalhes.
 
 ## backup.sh — Backup dos dados
 
@@ -133,12 +167,15 @@ tar -xzf ~/openclaw_backups/backup_20250115_143022.tar.gz -C ~/Developer/jadsCla
 
 ## Resumo de comandos rapidos
 
-| Acao                    | Comando                           |
-|-------------------------|-----------------------------------|
-| Iniciar producao        | `./scripts/start.sh prod`         |
-| Iniciar dev             | `./scripts/start.sh dev`          |
-| Parar producao          | `./scripts/stop.sh prod`          |
-| Parar dev               | `./scripts/stop.sh dev`           |
-| Status producao         | `./scripts/status.sh prod`        |
-| Logs em tempo real      | `./scripts/logs.sh prod -f`       |
-| Backup                  | `./scripts/backup.sh`             |
+| Acao                         | Comando                                       |
+|------------------------------|-----------------------------------------------|
+| Iniciar producao             | `./scripts/start.sh prod`                     |
+| Iniciar dev                  | `./scripts/start.sh dev`                      |
+| Iniciar com Watchtower       | `./scripts/start.sh prod --with-watchtower`   |
+| Parar producao               | `./scripts/stop.sh prod`                      |
+| Parar dev                    | `./scripts/stop.sh dev`                       |
+| Status producao              | `./scripts/status.sh prod`                    |
+| Logs em tempo real           | `./scripts/logs.sh prod -f`                   |
+| Build local                  | `./scripts/build-push.sh --no-push`           |
+| Build + push Docker Hub      | `./scripts/build-push.sh`                     |
+| Backup                       | `./scripts/backup.sh`                         |

@@ -20,14 +20,12 @@ log_fail() { echo -e "${RED}[FALHA]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[AVISO]${NC} $1"; }
 log_info() { echo -e "${CYAN}[INFO]${NC}  $1"; }
 
-if [ "$ENV" = "dev" ]; then
-    PORTA="8080"
-elif [ "$ENV" = "prod" ]; then
-    PORTA="8000"
-else
-    log_fail "Ambiente inválido: '${ENV}'. Use 'dev' ou 'prod'."
+if [ "$ENV" != "dev" ] && [ "$ENV" != "prod" ]; then
+    log_fail "Ambiente invalido: '${ENV}'. Use 'dev' ou 'prod'."
     exit 1
 fi
+
+PORTA="18789"
 
 echo ""
 echo "============================================"
@@ -58,7 +56,7 @@ case "$STATUS" in
         log_fail "Status: parado (exit code: ${EXIT_CODE})"
         ;;
     not_found)
-        log_fail "Container não encontrado. Execute: ./scripts/start.sh ${ENV}"
+        log_fail "Container nao encontrado. Execute: ./scripts/start.sh ${ENV}"
         exit 0
         ;;
     *)
@@ -66,7 +64,7 @@ case "$STATUS" in
         ;;
 esac
 
-# ---- 3. Informações do container ----
+# ---- 3. Informacoes do container ----
 if [ "$STATUS" = "running" ]; then
     echo ""
     log_info "Detalhes do container:"
@@ -75,16 +73,16 @@ if [ "$STATUS" = "running" ]; then
     STARTED=$(docker inspect --format='{{.State.StartedAt}}' openclaw_core 2>/dev/null | cut -d'.' -f1)
     echo "         Iniciado em: ${STARTED}"
 
-    # Usuário
+    # Usuario
     CONTAINER_USER=$(docker exec openclaw_core whoami 2>/dev/null || echo "desconhecido")
-    echo "         Usuário:     ${CONTAINER_USER}"
+    echo "         Usuario:     ${CONTAINER_USER}"
     if [ "$CONTAINER_USER" = "root" ] && [ "$ENV" = "prod" ]; then
-        log_warn "Rodando como ROOT em produção!"
+        log_warn "Rodando como ROOT em producao!"
     fi
 
-    # Memória
+    # Memoria
     MEM_USAGE=$(docker stats --no-stream --format "{{.MemUsage}}" openclaw_core 2>/dev/null || echo "N/A")
-    echo "         Memória:     ${MEM_USAGE}"
+    echo "         Memoria:     ${MEM_USAGE}"
 
     # CPU
     CPU_USAGE=$(docker stats --no-stream --format "{{.CPUPerc}}" openclaw_core 2>/dev/null || echo "N/A")
@@ -95,21 +93,21 @@ if [ "$STATUS" = "running" ]; then
     log_info "Healthcheck..."
     HEALTH=$(docker inspect --format='{{.State.Health.Status}}' openclaw_core 2>/dev/null || echo "sem_healthcheck")
     case "$HEALTH" in
-        healthy)   log_ok "Healthcheck: saudável" ;;
-        unhealthy) log_fail "Healthcheck: não saudável" ;;
+        healthy)   log_ok "Healthcheck: saudavel" ;;
+        unhealthy) log_fail "Healthcheck: nao saudavel" ;;
         starting)  log_warn "Healthcheck: inicializando..." ;;
         *)         log_info "Healthcheck: ${HEALTH}" ;;
     esac
 
     # HTTP check
     if command -v curl &>/dev/null; then
-        HTTP_CODE=$(curl -sf -o /dev/null -w "%{http_code}" "http://127.0.0.1:${PORTA}/health" 2>/dev/null || echo "000")
-        echo "         HTTP /health: ${HTTP_CODE}"
+        HTTP_CODE=$(curl -sf -o /dev/null -w "%{http_code}" "http://127.0.0.1:${PORTA}/" 2>/dev/null || echo "000")
+        echo "         HTTP Gateway: ${HTTP_CODE}"
     fi
 
-    # ---- 5. Verificações de segurança ----
+    # ---- 5. Verificacoes de seguranca ----
     echo ""
-    log_info "Verificações de segurança..."
+    log_info "Verificacoes de seguranca..."
 
     # Read-only filesystem
     RO_TEST=$(docker exec openclaw_core sh -c "touch /test_ro 2>&1" 2>/dev/null || echo "read-only")
@@ -118,9 +116,9 @@ if [ "$STATUS" = "running" ]; then
     else
         docker exec openclaw_core rm -f /test_ro 2>/dev/null || true
         if [ "$ENV" = "prod" ]; then
-            log_warn "Filesystem: gravável (esperado somente-leitura em produção)"
+            log_warn "Filesystem: gravavel (esperado somente-leitura em producao)"
         else
-            log_ok "Filesystem: gravável (aceitável em dev)"
+            log_ok "Filesystem: gravavel (aceitavel em dev)"
         fi
     fi
 
@@ -137,19 +135,37 @@ if [ "$STATUS" = "running" ]; then
     echo "         Portas: ${PORTS}"
 fi
 
-# ---- 6. Espaço em disco ----
+# ---- 6. Watchtower ----
 echo ""
-log_info "Espaço em disco (volumes):"
+log_info "Watchtower..."
+WT_STATUS=$(docker inspect --format='{{.State.Status}}' openclaw_watchtower 2>/dev/null || echo "not_found")
+case "$WT_STATUS" in
+    running)
+        log_ok "Watchtower: rodando"
+        WT_STARTED=$(docker inspect --format='{{.State.StartedAt}}' openclaw_watchtower 2>/dev/null | cut -d'.' -f1)
+        echo "         Iniciado em: ${WT_STARTED}"
+        ;;
+    not_found)
+        log_info "Watchtower: nao ativo (inicie com --with-watchtower)"
+        ;;
+    *)
+        log_warn "Watchtower: ${WT_STATUS}"
+        ;;
+esac
+
+# ---- 7. Espaco em disco ----
+echo ""
+log_info "Espaco em disco (volumes):"
 DATA_DIR="${PROJECT_ROOT}/${ENV}/data"
 if [ -d "$DATA_DIR" ]; then
     DATA_SIZE=$(du -sh "$DATA_DIR" 2>/dev/null | cut -f1)
     echo "         data/:   ${DATA_SIZE}"
 else
-    echo "         data/:   (não existe)"
+    echo "         data/:   (nao existe)"
 fi
 
 echo ""
 echo "============================================"
-echo "  Verificação concluída."
+echo "  Verificacao concluida."
 echo "============================================"
 echo ""
