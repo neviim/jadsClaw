@@ -84,3 +84,4 @@ Siga a documentacao na ordem numerada:
 6. [Recomendacoes](07-recomendacoes.md)
 7. [Watchtower](08-watchtower.md)
 8. [Docker Hub](09-docker-hub.md)
+9. [Deploy em novo servidor](10-deploy-novo-servidor.md)

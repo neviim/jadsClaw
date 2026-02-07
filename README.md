@@ -90,3 +90,4 @@ Both bound to `127.0.0.1` — local access only.
 | 7 | [Best practices](doc/07-recomendacoes.md) | Recommendations, backups and incident response |
 | 8 | [Watchtower](doc/08-watchtower.md) | Automatic container updates via Watchtower |
 | 9 | [Docker Hub](doc/09-docker-hub.md) | Building and publishing the image to Docker Hub |
+| 10 | [New server deploy](doc/10-deploy-novo-servidor.md) | Full setup guide for a fresh production server |

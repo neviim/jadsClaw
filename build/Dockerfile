@@ -46,10 +46,12 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Copiar artefatos do build
+# dist/ inclui backend (index.js) + UI (control-ui/) gerada pelo vite
 COPY --from=builder /build/dist ./dist
 COPY --from=builder /build/node_modules ./node_modules
 COPY --from=builder /build/package.json ./package.json
-COPY --from=builder /build/ui/dist ./ui/dist
+# Templates necessarios para heartbeat e workspace em runtime
+COPY --from=builder /build/docs ./docs
 
 ENV NODE_ENV=production
 

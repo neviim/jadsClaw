@@ -1,0 +1,7 @@
+# O Dockerfile clona o source do GitHub — nenhum arquivo local e necessario.
+# Este arquivo minimiza o build context enviado ao Docker daemon.
+
+# Tudo
+*
+
+# Nada precisa ser incluido — o build e auto-contido via git clone.
