@@ -4,7 +4,6 @@ services:
     container_name: openclaw_core
     networks:
       - openclaw_internal
-    env_file: .env
     deploy:
       resources:
         limits:
