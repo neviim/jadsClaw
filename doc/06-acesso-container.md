@@ -147,6 +147,23 @@ curl -X POST http://127.0.0.1:18789/api/chat \
 
 ## Troubleshooting de acesso
 
+### "unauthorized: gateway password missing"
+
+Este erro aparece no navegador quando a `OPENCLAW_GATEWAY_PASSWORD` esta configurada
+no `.env` mas ainda nao foi informada na interface web.
+
+**Solucao:**
+1. Abra http://127.0.0.1:18789 no navegador
+2. Clique no icone de **Settings** (engrenagem)
+3. No campo de senha/password, informe a mesma senha definida em `OPENCLAW_GATEWAY_PASSWORD` no seu `.env`
+4. A conexao sera autenticada e o erro desaparece
+
+Para verificar qual senha esta configurada:
+```bash
+grep OPENCLAW_GATEWAY_PASSWORD dev/.env   # desenvolvimento
+grep OPENCLAW_GATEWAY_PASSWORD prod/.env  # producao
+```
+
 ### "Connection refused" ao acessar pelo navegador
 
 - O container pode ainda estar inicializando. Aguarde 15-30 segundos.

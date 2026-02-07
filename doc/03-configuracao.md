@@ -14,10 +14,23 @@ isso, mas sempre verifique antes de fazer commit.
 
 | Variavel                   | Descricao                               | Obrigatoria |
 |----------------------------|-----------------------------------------|-------------|
-| OPENCLAW_GATEWAY_TOKEN     | Token de acesso ao gateway              | Sim*        |
-| OPENCLAW_GATEWAY_PASSWORD  | Senha alternativa ao token              | Sim*        |
+| OPENCLAW_GATEWAY_TOKEN     | Token de acesso ao gateway (API/RPC)    | Sim*        |
+| OPENCLAW_GATEWAY_PASSWORD  | Senha para acessar a Control UI         | Sim*        |
 
-*Pelo menos uma das duas e necessaria para acesso remoto ao gateway.
+*Pelo menos uma das duas e necessaria. A `OPENCLAW_GATEWAY_PASSWORD` e usada para
+autenticar no navegador (Control UI). Sem ela, o navegador mostra o erro:
+`unauthorized: gateway password missing`.
+
+### Como gerar token e senha
+
+```bash
+# Token (hex longo, para uso via API/RPC)
+openssl rand -hex 32
+
+# Senha legivel (4 blocos alfanumericos, para uso no navegador)
+cat /dev/urandom | tr -dc 'A-Z0-9' | fold -w 4 | head -n 4 | paste -sd '-'
+# Exemplo: K7X2-9BM4-QP3L-W8TF
+```
 
 ### APIs principais
 
