@@ -62,7 +62,7 @@ Access the gateway at **http://127.0.0.1:18789**
 | Start dev               | `./scripts/start.sh dev`                    |
 | Start prod              | `./scripts/start.sh prod`                   |
 | Start with Watchtower   | `./scripts/start.sh prod --with-watchtower` |
-| Stop                    | `./scripts/stop.sh dev` / `stop.sh prod`    |
+| Stop                    | `./scripts/stop.sh dev`   / `stop.sh prod`  |
 | Status                  | `./scripts/status.sh dev` / `status.sh prod`|
 | Live logs               | `./scripts/logs.sh dev -f`                  |
 | Build + push Docker Hub | `./scripts/build-push.sh`                   |
@@ -79,15 +79,15 @@ Both bound to `127.0.0.1` — local access only.
 
 ## Documentation
 
-| # | Document | Description |
-|---|----------|-------------|
-| 1 | [Overview](doc/01-visao-geral.md) | Architecture, principles and project structure |
-| 2 | [Installation](doc/02-instalacao.md) | Prerequisites, initial setup and first start |
-| 3 | [Configuration](doc/03-configuracao.md) | Environment variables, API keys and compose files |
-| 4 | [Security](doc/04-seguranca.md) | Hardening, protection layers and checklist |
-| 5 | [Scripts](doc/05-scripts.md) | Detailed usage of each operational script |
-| 6 | [Container access](doc/06-acesso-container.md) | Web interface, terminal, REST API and troubleshooting |
-| 7 | [Best practices](doc/07-recomendacoes.md) | Recommendations, backups and incident response |
-| 8 | [Watchtower](doc/08-watchtower.md) | Automatic container updates via Watchtower |
-| 9 | [Docker Hub](doc/09-docker-hub.md) | Building and publishing the image to Docker Hub |
-| 10 | [New server deploy](doc/10-deploy-novo-servidor.md) | Full setup guide for a fresh production server |
+| #  | Document                                            | Description                                           |
+|----|-----------------------------------------------------|-------------------------------------------------------|
+| 1  | [Overview](doc/01-visao-geral.md)                   | Architecture, principles and project structure        |
+| 2  | [Installation](doc/02-instalacao.md)                | Prerequisites, initial setup and first start          |
+| 3  | [Configuration](doc/03-configuracao.md)             | Environment variables, API keys and compose files     |
+| 4  | [Security](doc/04-seguranca.md)                     | Hardening, protection layers and checklist            |
+| 5  | [Scripts](doc/05-scripts.md)                        | Detailed usage of each operational script             |
+| 6  | [Container access](doc/06-acesso-container.md)      | Web interface, terminal, REST API and troubleshooting |
+| 7  | [Best practices](doc/07-recomendacoes.md)           | Recommendations, backups and incident response        |
+| 8  | [Watchtower](doc/08-watchtower.md)                  | Automatic container updates via Watchtower            |
+| 9  | [Docker Hub](doc/09-docker-hub.md)                  | Building and publishing the image to Docker Hub       |
+| 10 | [New server deploy](doc/10-deploy-novo-servidor.md) | Full setup guide for a fresh production server        |

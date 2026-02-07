@@ -20,12 +20,18 @@ log_fail() { echo -e "${RED}[FALHA]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[AVISO]${NC} $1"; }
 log_info() { echo -e "${CYAN}[INFO]${NC}  $1"; }
 
-if [ "$ENV" != "dev" ] && [ "$ENV" != "prod" ]; then
+if [ "$ENV" = "dev" ]; then
+    ENV_DIR="${PROJECT_ROOT}/dev"
+elif [ "$ENV" = "prod" ]; then
+    ENV_DIR="${PROJECT_ROOT}/prod"
+else
     log_fail "Ambiente invalido: '${ENV}'. Use 'dev' ou 'prod'."
     exit 1
 fi
 
-PORTA="18789"
+# Ler porta do .env (ou usar default)
+PORTA=$(grep -s '^OPENCLAW_PORT=' "${ENV_DIR}/.env" 2>/dev/null | cut -d'=' -f2)
+PORTA="${PORTA:-18789}"
 
 echo ""
 echo "============================================"

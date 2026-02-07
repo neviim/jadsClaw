@@ -67,8 +67,6 @@ log_ok "Docker Compose disponivel."
 # ---- 2. Verificar estrutura de arquivos ----
 log_info "Verificando estrutura do projeto..."
 
-PORTA="18789"
-
 if [ "$ENV" = "dev" ]; then
     ENV_DIR="${PROJECT_ROOT}/dev"
     COMPOSE_CMD="docker compose --project-directory ${ENV_DIR} -f ${PROJECT_ROOT}/base/docker-compose.yml -f ${ENV_DIR}/docker-compose.override.yml"
@@ -79,6 +77,12 @@ else
     log_fail "Ambiente invalido: '${ENV}'. Use 'dev' ou 'prod'."
     exit 1
 fi
+
+# Ler portas do .env (ou usar defaults)
+PORTA=$(grep -s '^OPENCLAW_PORT=' "${ENV_DIR}/.env" 2>/dev/null | cut -d'=' -f2)
+PORTA="${PORTA:-18789}"
+BRIDGE_PORT=$(grep -s '^OPENCLAW_BRIDGE_PORT=' "${ENV_DIR}/.env" 2>/dev/null | cut -d'=' -f2)
+BRIDGE_PORT="${BRIDGE_PORT:-18790}"
 
 # Adicionar watchtower se solicitado
 if [ "$WITH_WATCHTOWER" = true ]; then
@@ -148,7 +152,7 @@ for DIR in "${ENV_DIR}/data" "${ENV_DIR}/config"; do
 done
 
 # ---- 3. Verificar portas disponiveis ----
-for CHECK_PORT in 18789 18790; do
+for CHECK_PORT in ${PORTA} ${BRIDGE_PORT}; do
     if ss -tlnp 2>/dev/null | grep -q ":${CHECK_PORT} " || netstat -tlnp 2>/dev/null | grep -q ":${CHECK_PORT} "; then
         log_warn "Porta ${CHECK_PORT} ja esta em uso. O container pode falhar ao iniciar."
     fi
@@ -228,8 +232,8 @@ echo -e "  ${GREEN}OpenClawD iniciado com sucesso!${NC}"
 echo "============================================"
 echo ""
 echo "  Ambiente:  ${ENV}"
-echo "  Gateway:   http://127.0.0.1:18789"
-echo "  Bridge:    porta 18790"
+echo "  Gateway:   http://127.0.0.1:${PORTA}"
+echo "  Bridge:    porta ${BRIDGE_PORT}"
 echo "  Container: openclaw_core"
 if [ "$WITH_WATCHTOWER" = true ]; then
 echo "  Watchtower: ativo (atualizacoes diarias as 4h)"

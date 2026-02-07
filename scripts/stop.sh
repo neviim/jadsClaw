@@ -70,8 +70,8 @@ else
 fi
 
 # Verificar se realmente parou
-STATUS=$(docker inspect --format='{{.State.Status}}' openclaw_core 2>/dev/null || echo "removed")
-if [ "$STATUS" = "removed" ] || [ "$STATUS" = "exited" ]; then
+STATUS=$(docker inspect --format='{{.State.Status}}' openclaw_core 2>/dev/null || true)
+if [ -z "$STATUS" ] || [ "$STATUS" = "removed" ] || [ "$STATUS" = "exited" ]; then
     log_ok "Container openclaw_core nao esta mais rodando."
 else
     echo -e "${RED}[AVISO]${NC} Container ainda existe com status: ${STATUS}"
@@ -79,8 +79,8 @@ fi
 
 # Verificar watchtower
 if [ "$WT_STATUS" = "running" ]; then
-    WT_AFTER=$(docker inspect --format='{{.State.Status}}' openclaw_watchtower 2>/dev/null || echo "removed")
-    if [ "$WT_AFTER" = "removed" ] || [ "$WT_AFTER" = "exited" ]; then
+    WT_AFTER=$(docker inspect --format='{{.State.Status}}' openclaw_watchtower 2>/dev/null || true)
+    if [ -z "$WT_AFTER" ] || [ "$WT_AFTER" = "removed" ] || [ "$WT_AFTER" = "exited" ]; then
         log_ok "Watchtower parado."
     fi
 fi
