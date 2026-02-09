@@ -50,6 +50,9 @@ WORKDIR /app
 COPY --from=builder /build/dist ./dist
 COPY --from=builder /build/node_modules ./node_modules
 COPY --from=builder /build/package.json ./package.json
+# Channel plugins (telegram, discord, whatsapp, etc.)
+# Carregados em runtime via jiti (TS transpiler) pelo plugin discovery system
+COPY --from=builder /build/extensions ./extensions
 # Templates necessarios para heartbeat e workspace em runtime
 COPY --from=builder /build/docs ./docs
 
