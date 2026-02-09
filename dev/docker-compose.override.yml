@@ -6,6 +6,10 @@ services:
     volumes:
       - ./data:/home/node/.openclaw:rw
       - ./config:/app/config:rw
+      # Patch: fix nostr-tools@2.23.0 subscribeMany double-wrapping bug
+      - ./patches/nostr/src/nostr-bus.ts:/app/extensions/nostr/src/nostr-bus.ts:ro
+      # Patch: fix missing handleInboundMessage — use standard inbound pipeline
+      - ./patches/nostr/src/channel.ts:/app/extensions/nostr/src/channel.ts:ro
     environment:
       - DEBUG=true
       - LOG_LEVEL=debug
